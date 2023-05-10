@@ -1,0 +1,50 @@
+//Import express
+const express = require("express");
+
+//Déclaration la fonction qui va déclarer les routes
+const router = express.Router();
+
+//Import axios
+const axios = require("axios");
+
+// Permettre d'activer les variables d'environnement qui se trouvent dans le fichier `.env`
+require("dotenv").config();
+
+//Déclaration des routes
+
+//Get a list of characters
+router.get("/characters", async (req, res) => {
+  try {
+    let { skip, name } = req.query;
+    if (!skip) {
+      skip = 0;
+    } else {
+      skip = (skip - 1) * 100;
+    }
+
+    if (!name) {
+      name = "";
+    }
+    const promise = await axios.get(
+      `https://lereacteur-marvel-api.herokuapp.com/characters?apiKey=${process.env.API_SECRET}&limit=100&skip=${skip}&name=${name}`
+    );
+    res.status(200).json(promise.data);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+//Get a the infos of a specific character
+router.get("/character/:characterId", async (req, res) => {
+  try {
+    const promise = await axios.get(
+      `https://lereacteur-marvel-api.herokuapp.com/character/${req.params.characterId}?apiKey=${process.env.API_SECRET}`
+    );
+    res.status(200).json(promise.data);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+//Export du routeur qui contient les routes
+module.exports = router;
